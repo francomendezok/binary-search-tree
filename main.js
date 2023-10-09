@@ -83,7 +83,6 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
             // Delete the in-order successor
             
             root.right = this.delete(root.right, root.data);
-            console.log(root.right);
         }
 
 
@@ -100,11 +99,20 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
         }
         return root.data;
     }
+
+    find(root, value) {
+        if (!root) return 'No node';
+
+        if (root.data === value) return root;
+
+        if (value > root.data) return this.find(root.right, value)
+        
+        else if (value < root.data) return this.find(root.left, value);
+    }
   }
   let tree = new Tree();
   let node = tree.buildTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
   tree.insert(node, 300);
-
-    console.log(prettyPrint(node));
-    tree.delete(node, 67);
-    console.log(prettyPrint(node));
+  tree.delete(node, 67);
+  let is = tree.find(node, 4)
+  console.log(is);
