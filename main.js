@@ -11,6 +11,24 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
     }
   };
 
+  class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return null;
+        return this.items.shift();
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+}
 
   class Node {
     constructor (data) {
@@ -109,10 +127,180 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
         
         else if (value < root.data) return this.find(root.left, value);
     }
+
+    levelOrder(root, cb) {
+        if (!root) return [];
+        
+        let result = [];
+        let queue = new Queue();
+
+        queue.enqueue(root);
+
+        while (!queue.isEmpty()) {
+            const currentNode = queue.dequeue();
+    
+            if (cb) {
+                cb(currentNode.data);
+            } else {
+                result.push(currentNode.data);
+            }
+    
+            if (currentNode.left) {
+                queue.enqueue(currentNode.left);
+            }
+    
+            if (currentNode.right) {
+                queue.enqueue(currentNode.right);
+            }
+        }
+    
+        return result;
+    }
+
+    inOrder(root, cb) {
+        let result = [];
+
+        function recursiveInOrder(root) {
+            if (root !== null) {
+                recursiveInOrder(root.left);
+                if (cb) cb(root.data);
+                result.push(root.data);
+                recursiveInOrder(root.right);
+            }
+        }
+    
+        recursiveInOrder(root);
+    
+        return result;
+    }
+
+    preOrder(root, cb) {
+        if (!root) return null;
+
+        if (cb) cb(root.data);
+
+        this.inOrder(root.left, cb);
+
+        this.inOrder(root.right, cb);
+    }
+
+    postOrder(root, cb) {
+        if (!root) return null;
+
+        this.inOrder(root.left, cb);
+        
+        this.inOrder(root.right, cb);
+        
+        if (cb) cb(root.data);
+    }
+
+    height(root) {
+        if (!root) return -1;
+
+        let leftHeight = this.height(root.left);
+        let rightHeight = this.height(root.right);
+        return Math.max(leftHeight, rightHeight) + 1;
+    }
+
+    depth(root) {
+
+        if (!root) return 0;
+
+        let leftDepth = 0;
+        let rightDepth = 0;
+
+
+        while (root.left) {
+            root = root.left;
+            leftDepth++;
+        }
+
+        while (root.right) {
+            root = root.right;
+            rightDepth++;
+        }
+
+        return Math.max(leftDepth, rightDepth) + 1;
+    }
+
+    isBalanced(root) {
+        if (!root) return true;
+
+        let leftHeight = this.height(root.left);
+        let rightHeight = this.height(root.right);
+
+        if (
+            Math.abs(leftHeight - rightHeight) <= 1 &&
+            this.isBalanced(root.left) &&
+            this.isBalanced(root.right)
+        ) {
+            return true;
+        }
+    
+        return false;
+    }
+
+    rebalance(root) {
+        let arr = this.inOrder(root);
+        let tree = this.buildTree(arr);
+
+        return tree;
+    }
   }
-  let tree = new Tree();
-  let node = tree.buildTree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-  tree.insert(node, 300);
-  tree.delete(node, 67);
-  let is = tree.find(node, 4)
-  console.log(is);
+
+
+  function print(value) {
+    console.log(value);
+  }
+
+  function printOrders(tree, node) {
+    console.log('In Level:');
+    tree.levelOrder(node, print)
+    console.log('Pre Order:');
+    tree.preOrder(node, print)
+    console.log('Post Order:');
+    tree.postOrder(node, print)
+    console.log('In Order:');
+    tree.inOrder(node, print);
+  }
+
+
+  function randomArray () {
+    const arrayLength = Math.floor(Math.random() * 31) + 10;
+    const array = [];
+
+    for (let i = 0; i < arrayLength; i++) {
+        const num = Math.floor(Math.random() * 100) + 1;
+        array.push(num);
+    }
+    return array;
+}
+
+  function driver () {
+    let tree = new Tree();
+    let arr = randomArray();
+    let node = tree.buildTree(arr);
+    const num = Math.floor(Math.random() * 6) + 1;
+
+
+    console.log('1 Balanced:', tree.isBalanced(node));
+    
+    
+    for (let i = 0; i < num; i++) {
+        const num = Math.floor(Math.random() * 100) + 1;
+        tree.insert(node, num);  
+    }
+    let balanced = tree.isBalanced(node);
+    console.log('2 Balanced:', tree.isBalanced(node));
+
+    if (!balanced) {
+        let newTree = tree.rebalance(node)
+        console.log('Balanced:', tree.isBalanced(newTree));
+    };
+
+    printOrders(tree, node);
+  }
+
+
+
+driver();
